@@ -1,8 +1,15 @@
 package com.gmail.psyh2409;
 
+import com.gmail.psyh2409.comparators.AgeComparator;
+import com.gmail.psyh2409.comparators.NameComparator;
+import com.gmail.psyh2409.comparators.SurnameComparator;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
-public class Group {
+public class Group implements MilitaryCommissar {
     private Student[] students;
 
     public Group() {
@@ -37,7 +44,7 @@ public class Group {
 
     @Override
     public String toString() {
-        sortBySurname();
+        customSortBySurname();
         StringBuilder sortedBySurname = new StringBuilder("Group{");
         if (students == null) {
             return "Group doesn't exist.";
@@ -57,6 +64,30 @@ public class Group {
                 return true;
             }
             if (i == students.length - 1) throw new RedundantStudentException();
+        }
+        return false;
+    }
+
+    public boolean addStudentFromKeyboard() throws RedundantStudentException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        String sex, name, surname;
+        int age;
+        long recordBook;
+        try {
+            System.out.println("We have a new student!");
+            System.out.println("Please enter sex (male/female)");
+            sex = bufferedReader.readLine();
+            System.out.println("Please enter name");
+            name = bufferedReader.readLine();
+            System.out.println("Please enter surname");
+            surname = bufferedReader.readLine();
+            System.out.println("Please enter age");
+            age = Integer.parseInt(bufferedReader.readLine());
+            System.out.println("Please enter record-book number");
+            recordBook = Long.parseLong(bufferedReader.readLine());
+            return addStudent(new Student(Sex.valueOf(sex), name, surname, age, recordBook));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return false;
     }
@@ -86,7 +117,19 @@ public class Group {
         return null;
     }
 
-    private void sortBySurname() {
+    public void sortByAge() {
+        Arrays.sort(students, new AgeComparator());
+    }
+
+    public void sortByName() {
+        Arrays.sort(students, new NameComparator());
+    }
+
+    public void sortBySurname() {
+        Arrays.sort(students, new SurnameComparator());
+    }
+
+    private void customSortBySurname() {
         Student temp;
         sortByNull();
         if (students == null) return;
@@ -116,5 +159,27 @@ public class Group {
                 }
             }
         }
+    }
+
+    @Override
+    public Student[] mobilisation() {
+        Student[] soldiers;
+        int count = 0;
+        sortByAge();
+        for (Student student : students) {
+            if (student == null) continue;
+            if (student.getSex().equals(Sex.male) && student.getAge() >= 18) {
+                count++;
+            }
+        }
+        soldiers = new Student[count];
+        for (int i = 0, j = 0; i < students.length; i++) {
+            if (students[i] == null) continue;
+            if (students[i].getSex().equals(Sex.male) && students[i].getAge() >= 18) {
+                soldiers[j] = students[i];
+                j++;
+            }
+        }
+        return soldiers;
     }
 }
